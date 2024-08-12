@@ -9,7 +9,7 @@ let
   cfg = config.opnix;
   scripts = import ./scripts.nix {
     inherit lib;
-    inherit config;
+    inherit config pkgs;
   };
 in {
   options.opnix = {
@@ -42,6 +42,7 @@ in {
     secrets = mkOption {
       type = types.attrsOf secretFileDeclaration;
       description = "The secrets you want to use in your NixOS deployment";
+      default = { };
       example = literalExpression ''
         {
           my-secret = {
