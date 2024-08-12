@@ -12,5 +12,6 @@
 
           packages = with pkgs; [ nixos-shell ];
         };
+        nixosModules.default = import ./modules/op-secrets.nix;
       });
 }
