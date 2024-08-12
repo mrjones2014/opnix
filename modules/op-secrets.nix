@@ -5,7 +5,7 @@ let
   cfg = config.opnix;
   scripts = import ./scripts.nix;
 in {
-  options = {
+  options.opnix = {
     opBin = mkOption {
       type = types.str;
       default = "${pkgs._1password}/bin/op";
