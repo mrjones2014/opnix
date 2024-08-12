@@ -1,4 +1,4 @@
-{ config, options, lib, ... }:
+{ config, lib, ... }:
 let
   cfg = config.opnix;
   op = cfg.opBin;

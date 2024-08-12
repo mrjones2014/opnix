@@ -1,5 +1,5 @@
 /* {
-      opnix.secret = {
+      opnix.secrets = {
          my-secrets = {
            source = ''
              [SomeHeader]
@@ -13,9 +13,11 @@
       services.some_servive.privateKeyFile = config.opnix.secrets.my-secret.path;
    }
 */
-{ lib, ... }:
+{ lib, config, ... }:
 with lib;
-let inherit (config.users) users;
+let
+  inherit (config.users) users;
+  cfg = config.opnix;
 in {
   secretFileDeclaration = types.submodule ({ config, ... }: {
     options = {

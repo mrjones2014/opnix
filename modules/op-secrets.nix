@@ -1,9 +1,16 @@
 { lib, pkgs, config, ... }:
 with lib;
 let
-  inherit (import ./types.nix) secretFileDeclaration;
+  inherit (import ./types.nix {
+    inherit lib;
+    inherit config;
+  })
+    secretFileDeclaration;
   cfg = config.opnix;
-  scripts = import ./scripts.nix;
+  scripts = import ./scripts.nix {
+    inherit lib;
+    inherit config;
+  };
 in {
   options.opnix = {
     opBin = mkOption {

@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     opnix = {
-      url = "github:mrjones2014/op-nix";
+      url = "/Users/mat/git/op-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
