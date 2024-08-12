@@ -15,8 +15,8 @@ in {
         {
           my-secret = {
             source = "op://VaultName/ItemName/FieldName";
-            user = "SomeServiceUser";
-            group = "SomeServiceGroup";
+            user = config.services.some_service.user;
+            group = config.services.some_service.group;
             mode = "0400";
           };
           another-secret.source = \'\'
