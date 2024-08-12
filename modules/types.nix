@@ -1,7 +1,14 @@
 { lib, ... }:
-with lib; {
-  secretFileDeclaration = types.submodule {
+with lib;
+let inherit (config.users) users;
+in {
+  secretFileDeclaration = types.submodule ({ config, ... }: {
     options = {
+      name = mkOption {
+        type = types.str;
+        default = config._module.args.name;
+        description = "Name of the file used in {option}`opnix.secretsDir`";
+      };
       source = mkOption {
         type = types.oneOf [ types.str types.lines ];
         description =
@@ -47,6 +54,9 @@ with lib; {
           Path where the decrypted secret is installed.
         '';
       };
+      symlink = mkEnableOption "symlinking secrets to their destination" // {
+        default = true;
+      };
     };
-  };
+  });
 }
