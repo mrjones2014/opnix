@@ -60,6 +60,17 @@ in {
     };
   };
   config = mkIf (cfg.secrets != { }) (mkMerge [{
+    systemd.services.opnix = {
+      wants = [ "network-online.target" ];
+      after = [ "network.target" "network-online.target" ];
+
+      script = ''
+        ${scripts.installSecrets}
+        ${scripts.chownSecrets}
+      '';
+    };
+
+
     system = {
       activationScripts = {
         # Create a new directory full of secrets for symlinking (this helps
@@ -68,26 +79,6 @@ in {
         opnixNewGeneration = {
           text = scripts.newGeneration;
           deps = [ "specialfs" ];
-        };
-
-        opnixInstall = {
-          text = scripts.installSecrets;
-          deps = [ "opnixNewGeneration" "specialfs" "etc" ];
-        };
-
-        # So user passwords can be encrypted.
-        #users.deps = [ "opnixInstall" ];
-
-        # Change ownership and group after users and groups are made.
-        opnixChown = {
-          text = scripts.chownSecrets;
-          deps = [ "users" "groups" "opnixInstall" ];
-        };
-
-        # So other activation scripts can depend on opnix being done.
-        opnix = {
-          text = "";
-          deps = [ "opnixChown" ];
         };
       };
     };

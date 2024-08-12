@@ -17,4 +17,8 @@
       };
     }];
   };
+  systemd.services.homepage-dashboard = {
+    after = [ "opnix.service" ];
+    wants = [ "opnix.service" ];
+  };
 }

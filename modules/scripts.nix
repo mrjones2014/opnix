@@ -23,8 +23,6 @@ let
     chown :${chownGroup} "${cfg.secretsMountPoint}" "${cfg.secretsMountPoint}/$_opnix_generation"
   '';
   cleanupAndLink = ''
-    _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
-    (( ++_opnix_generation ))
     echo "[opnix] symlinking new secrets to ${cfg.secretsDir} (generation $_opnix_generation)..."
     ln -sfT "${cfg.secretsMountPoint}/$_opnix_generation" ${cfg.secretsDir}
 
@@ -58,7 +56,8 @@ let
     (
       umask u=r,g=,o=
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
-      OP_SERVICE_ACCOUNT_TOKEN=$(cat ${cfg.serviceAccountTokenPath}) ${op} inject -o "$TMP_FILE" -i ${pkgs.writeText "blah" secretType.source}
+      set -x
+      OP_SERVICE_ACCOUNT_TOKEN=$(cat ${cfg.serviceAccountTokenPath}) ${op} inject -o "$TMP_FILE" -i ${pkgs.writeText "blah" secretType.source} --config /root/.config/op
     )
     chmod ${secretType.mode} "$TMP_FILE"
     mv -f "$TMP_FILE" "$_truePath"
@@ -77,11 +76,15 @@ let
     if [ "$SA_TOKEN_FILE_PERMS" -ne "400" ] && [ "$SA_TOKEN_FILE_PERMS" -ne "600" ]; then
       echo "[opnix] WARN: file '${cfg.serviceAccountTokenPath}' has incorrect permissions: $SA_TOKEN_FILE_PERMS"
     fi
+
+    _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
+    (( ++_opnix_generation ))
   '';
   installSecrets = builtins.concatStringsSep "\n"
     ([
       "echo '[opnix] decrypting secrets...'"
-      "chmod 600 /root/.config/op/config"
+      "mkdir -p /root/.config/op"
+      "chmod 700 /root/.config/op"
       testServiceAccountToken
     ]
     ++ (map installSecret (builtins.attrValues cfg.secrets))
