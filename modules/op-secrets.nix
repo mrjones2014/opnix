@@ -76,7 +76,7 @@ in {
         };
 
         # So user passwords can be encrypted.
-        users.deps = [ "opnixInstall" ];
+        #users.deps = [ "opnixInstall" ];
 
         # Change ownership and group after users and groups are made.
         opnixChown = {
