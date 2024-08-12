@@ -12,7 +12,21 @@
 
           packages = with pkgs; [ nixos-shell ];
         };
+
       }) // {
         nixosModules.default = import ./modules/op-secrets.nix;
+
+        nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+                # ./modules/op-secrets.nix
+                ./vms/vm.nix
+                # (
+                #     { ... }: {
+                #         nixpkgs.config.allowUnfree = true;
+                #     }
+                # )
+            ];
+        };
       };
 }
