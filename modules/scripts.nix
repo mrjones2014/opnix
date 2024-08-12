@@ -73,7 +73,7 @@ let
       exit 1
     fi
 
-    SA_TOKEN_FILE_PERMS=$(stat -c %s '${cfg.serviceAccountTokenPath}')
+    SA_TOKEN_FILE_PERMS=$(stat -c %a '${cfg.serviceAccountTokenPath}')
     if [ "$SA_TOKEN_FILE_PERMS" -ne "400" ] && [ "$SA_TOKEN_FILE_PERMS" -ne "600" ]; then
       echo "[opnix] WARN: file '${cfg.serviceAccountTokenPath}' has incorrect permissions: $SA_TOKEN_FILE_PERMS"
     fi
