@@ -72,7 +72,7 @@ in {
 
         opnixInstall = {
           text = scripts.installSecrets;
-          deps = [ "opnixNewGeneration" "specialfs" ];
+          deps = [ "opnixNewGeneration" "specialfs" "etc" ];
         };
 
         # So user passwords can be encrypted.
@@ -81,7 +81,7 @@ in {
         # Change ownership and group after users and groups are made.
         opnixChown = {
           text = scripts.chownSecrets;
-          deps = [ "users" "groups" ];
+          deps = [ "users" "groups" "opnixInstall" ];
         };
 
         # So other activation scripts can depend on opnix being done.
