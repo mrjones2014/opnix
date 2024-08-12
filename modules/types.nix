@@ -16,7 +16,7 @@ in {
         example = literalExpression ''
           \'\'
             [SomeTomlHeader]
-            SomeValue = "op://VaultName/ItemName/FieldName"
+            SomeValue = "{{ op://VaultName/ItemName/FieldName }}"
           \'\'
         '';
       };

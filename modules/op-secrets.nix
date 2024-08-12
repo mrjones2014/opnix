@@ -38,14 +38,14 @@ in {
       example = literalExpression ''
         {
           my-secret = {
-            source = "op://VaultName/ItemName/FieldName";
+            source = "{{ op://VaultName/ItemName/FieldName }}";
             user = config.services.some_service.user;
             group = config.services.some_service.group;
             mode = "0400";
           };
           another-secret.source = \'\'
             [SomeTomlHeader]
-            SomeValue = "op://AnotherVault/AnotherItem/AnotherField"
+            SomeValue = "{{ op://AnotherVault/AnotherItem/AnotherField }}"
           \'\';
         }
       '';
