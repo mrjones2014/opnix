@@ -2,16 +2,7 @@
 let
   cfg = config.opnix;
   op = cfg.opBin;
-  isDarwin =
-    lib.attrsets.hasAttrByPath [ "environment" "darwinConfig" ] options;
-  mountCommand = if isDarwin then ''
-    if ! diskutil info "${cfg.secretsMountPoint}" &> /dev/null; then
-        num_sectors=1048576
-        dev=$(hdiutil attach -nomount ram://"$num_sectors" | sed 's/[[:space:]]*$//')
-        newfs_hfs -v opnix "$dev"
-        mount -t hfs -o nobrowse,nodev,nosuid,-m=0751 "$dev" "${cfg.secretsMountPoint}"
-    fi
-  '' else ''
+  mountCommand = ''
     grep -q "${cfg.secretsMountPoint} ramfs" /proc/mounts ||
       mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
   '';
@@ -25,7 +16,7 @@ let
     mkdir -p "${cfg.secretsMountPoint}/$_opnix_generation"
     chmod 0751 "${cfg.secretsMountPoint}/$_opnix_generation"
   '';
-  chownGroup = if isDarwin then "admin" else "keys";
+  chownGroup = "keys";
   # chown the secrets mountpoint and the current generation to the keys group
   # instead of leaving it root:root.
   chownMountPoint = ''

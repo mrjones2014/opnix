@@ -51,56 +51,37 @@ in {
       '';
     };
   };
-  config = mkIf (cfg.secrets != { }) (mkMerge [
-    (optionalAttrs (!isDarwin) {
-      system = {
-        activationScripts = {
-          # Create a new directory full of secrets for symlinking (this helps
-          # ensure removed secrets are actually removed, or at least become
-          # invalid symlinks).
-          opnixNewGeneration = {
-            text = scripts.newGeneration;
-            deps = [ "specialfs" ];
-          };
+  config = mkIf (cfg.secrets != { }) (mkMerge [{
+    system = {
+      activationScripts = {
+        # Create a new directory full of secrets for symlinking (this helps
+        # ensure removed secrets are actually removed, or at least become
+        # invalid symlinks).
+        opnixNewGeneration = {
+          text = scripts.newGeneration;
+          deps = [ "specialfs" ];
+        };
 
-          opnixInstall = {
-            text = scripts.installSecrets;
-            deps = [ "opnixNewGeneration" "specialfs" ];
-          };
+        opnixInstall = {
+          text = scripts.installSecrets;
+          deps = [ "opnixNewGeneration" "specialfs" ];
+        };
 
-          # So user passwords can be encrypted.
-          users.deps = [ "opnixInstall" ];
+        # So user passwords can be encrypted.
+        users.deps = [ "opnixInstall" ];
 
-          # Change ownership and group after users and groups are made.
-          opnixChown = {
-            text = scripts.chownSecrets;
-            deps = [ "users" "groups" ];
-          };
+        # Change ownership and group after users and groups are made.
+        opnixChown = {
+          text = scripts.chownSecrets;
+          deps = [ "users" "groups" ];
+        };
 
-          # So other activation scripts can depend on opnix being done.
-          opnix = {
-            text = "";
-            deps = [ "opnixChown" ];
-          };
+        # So other activation scripts can depend on opnix being done.
+        opnix = {
+          text = "";
+          deps = [ "opnixChown" ];
         };
       };
-    })
-    (optionalAttrs isDarwin {
-      launchd.daemons.activate-opnix = {
-        script = ''
-          set -e
-          set -o pipefail
-          export PATH="${pkgs.gnugrep}/bin:${pkgs.coreutils}/bin:@out@/sw/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-          ${scripts.newGeneration}
-          ${scripts.installSecrets}
-          ${scripts.chownSecrets}
-          exit 0
-        '';
-        serviceConfig = {
-          RunAtLoad = true;
-          KeepAlive.SuccessfulExit = false;
-        };
-      };
-    })
-  ]);
+    };
+  }]);
 }
