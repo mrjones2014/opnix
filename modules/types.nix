@@ -1,3 +1,18 @@
+/* {
+      opnix.secret = {
+         my-secrets = {
+           source = ''
+             [SomeHeader]
+             Value = "{{ op://ValueName/ItemName/FieldName }}"
+           '';
+          user = config.services.some_service.user;
+          group = config.services.some_servive.group;
+         };
+       };
+
+      services.some_servive.privateKeyFile = config.opnix.secrets.my-secret.path;
+   }
+*/
 { lib, ... }:
 with lib;
 let inherit (config.users) users;
