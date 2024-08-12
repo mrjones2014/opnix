@@ -76,13 +76,18 @@ let
     SA_TOKEN_FILE_PERMS=$(stat -c %s '${cfg.serviceAccountTokenPath}')
     if [ "$SA_TOKEN_FILE_PERMS" -ne "400" ] && [ "$SA_TOKEN_FILE_PERMS" -ne "600" ]; then
       echo "[opnix] WARN: file '${cfg.serviceAccountTokenPath}' has incorrect permissions: $SA_TOKEN_FILE_PERMS"
-    end
+    fi
   '';
   installSecrets = builtins.concatStringsSep "\n"
-    ([ "echo '[opnix] decrypting secrets...'" ] ++ [ testServiceAccountToken ]
-      ++ (map installSecret (builtins.attrValues cfg.secrets))
-      ++ [ cleanupAndLink ]);
-in {
+    ([
+      "echo '[opnix] decrypting secrets...'"
+      "chmod 600 /root/.config/op/config"
+      testServiceAccountToken
+    ]
+    ++ (map installSecret (builtins.attrValues cfg.secrets))
+    ++ [ cleanupAndLink ]);
+in
+{
   inherit newGeneration;
   inherit installSecrets;
   inherit chownSecrets;
