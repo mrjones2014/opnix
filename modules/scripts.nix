@@ -42,7 +42,7 @@ let
   '';
   chownSecret = secretType: ''
     ${setTruePath secretType}
-    chown ${secretType.owner}:${secretType.group} "$_truePath"
+    chown ${secretType.user}:${secretType.group} "$_truePath"
   '';
   chownSecrets = builtins.concatStringsSep "\n"
     ([ "echo '[opnix] chowning...'" ] ++ [ chownMountPoint ]
@@ -50,14 +50,13 @@ let
   # TODO
   installSecret = secretType: ''
     ${setTruePath secretType}
-    echo "decrypting '${secretType.file}' to '$_truePath'..."
+    echo "expanding '${secretType.name}' to '$_truePath'..."
     TMP_FILE="$_truePath.tmp"
 
     mkdir -p "$(dirname "$_truePath")"
     [ "${secretType.path}" != "${cfg.secretsDir}/${secretType.name}" ] && mkdir -p "$(dirname "${secretType.path}")"
     (
       umask u=r,g=,o=
-      test -f "${secretType.file}" || echo '[opnix] WARNING: encrypted file ${secretType.file} does not exist!'
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
       echo ${secretType.source} | OP_SERVICE_ACCOUNT_TOKEN=$(cat ${cfg.serviceAccountTokenPath}) ${op} inject -o "$TMP_FILE"
     )
@@ -80,7 +79,7 @@ let
     end
   '';
   installSecrets = builtins.concatStringsSep "\n"
-    ([ "echo '[opnix] decrypting secrets...'" ] ++ testServiceAccountToken
+    ([ "echo '[opnix] decrypting secrets...'" ] ++ [ testServiceAccountToken ]
       ++ (map installSecret (builtins.attrValues cfg.secrets))
       ++ [ cleanupAndLink ]);
 in {

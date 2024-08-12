@@ -1,4 +1,6 @@
-{ pkgs, ... }: {
+{ pkgs, lib, ... }: {
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [ "1password-cli" ];
   imports = [ ./homepage.nix ];
   environment.etc."op_service_account_token" = {
     text = ''

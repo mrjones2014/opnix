@@ -53,9 +53,9 @@ in {
       };
       group = mkOption {
         type = types.str;
-        default = users.${config.owner}.group or "0";
+        default = users.${config.user}.group or "0";
         example = literalExpression ''
-          users.''${config.owner}.group or "0"
+          users.''${config.user}.group or "0"
         '';
         description = ''
           Group of the decrypted secret.

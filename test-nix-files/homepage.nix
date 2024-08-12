@@ -1,9 +1,11 @@
 { config, ... }: {
-  opnix.secrets = {
+  opnix = {
     serviceAccountTokenPath = "/etc/op_service_account_token";
-    homepage-config.source = ''
-      HOMEPAGE_TEST_SECRET="{{ "op://opnix testing/opnix test/password" }}"
-    '';
+    secrets = {
+      homepage-config.source = ''
+        HOMEPAGE_TEST_SECRET="{{ op://opnix testing/opnix test/password }}"
+      '';
+    };
   };
   services.homepage-dashboard = {
     enable = true;
