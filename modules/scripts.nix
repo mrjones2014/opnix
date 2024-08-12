@@ -68,11 +68,17 @@ let
       [ "${secretType.path}" != "${cfg.secretsDir}/${secretType.name}" ] && ln -sfT "${cfg.secretsDir}/${secretType.name}" "${secretType.path}"
     ''}
   '';
-  # TODO check that:
-  # - config.serviceAccountTokenPath exists
-  # - it is not world-readable
-  # - it is readable by the user that runs `activationScript`s (need to figure out what this user is)
-  testServiceAccountToken = "";
+  testServiceAccountToken = ''
+    if [ ! -f "${cfg.serviceAccountTokenPath}" ]; then
+      echo "[opnix] ERROR: file '${cfg.serviceAccountTokenPath}' does not exist!"
+      exit 1
+    fi
+
+    SA_TOKEN_FILE_PERMS=$(stat -c %s '${cfg.serviceAccountTokenPath}')
+    if [ "$SA_TOKEN_FILE_PERMS" -ne "400" ] && [ "$SA_TOKEN_FILE_PERMS" -ne "600" ]; then
+      echo "[opnix] WARN: file '${cfg.serviceAccountTokenPath}' has incorrect permissions: $SA_TOKEN_FILE_PERMS"
+    end
+  '';
   installSecrets = builtins.concatStringsSep "\n"
     ([ "echo '[opnix] decrypting secrets...'" ] ++ testServiceAccountToken
       ++ (map installSecret (builtins.attrValues cfg.secrets))
