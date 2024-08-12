@@ -8,7 +8,7 @@
       # test is a hostname for our machine
       nixosConfigurations.test = nixpkgs.lib.nixosSystem {
         inherit system;
-        modules = [ opnix.nixosModules.default ./configuration.nix ];
+        modules = [ opnix.nixosModules.${system}.default ./configuration.nix ];
       };
     };
 }
