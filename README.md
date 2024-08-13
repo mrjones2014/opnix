@@ -99,3 +99,7 @@ The Service Account token is provided to the `systemd` jobs via an `EnvironmentF
 Your `source` text (e.g. `opnix.secrets.my-secret.source = "{{ op://SomeVault/SomeItem/token }}";`) _**does appear**_ in the Nix store, in plaintext.
 Your **actual secrets _do NOT_** appear in the Nix store at all; however they are mounted in plaintext to a temporary `ramfs` during runtime, with
 strict UNIX file permissions. These files go away when the machine is powered off, and are recreated during system activation.
+
+## Acknowledgements/Prior Art
+
+Much of the logic in this project is very similar to that of [agenix](https://github.com/ryantm/agenix); thanks for all the hard work you've put into that project!
