@@ -11,11 +11,13 @@
   # customize kernel version
   boot.kernelPackages = pkgs.linuxPackages_5_15;
 
+  environment.systemPackages = with pkgs; [ docker ];
+
   users.groups.admin = { };
   users.users = {
     admin = {
       isNormalUser = true;
-      extraGroups = [ "wheel" ];
+      extraGroups = [ "wheel" "oci" ];
       # only used for a VM not connected to anything, so its fine to put the password here
       password = "admin";
       group = "admin";

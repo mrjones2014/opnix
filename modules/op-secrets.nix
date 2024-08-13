@@ -64,16 +64,13 @@ in {
       wants = [ "network-online.target" ];
       after = [ "network.target" "network-online.target" ];
 
-      serviceConfig = {
-        Type = "oneshot";
-      };
+      serviceConfig = { Type = "oneshot"; };
 
       script = ''
         ${scripts.installSecrets}
         ${scripts.chownSecrets}
       '';
     };
-
 
     system = {
       activationScripts = {

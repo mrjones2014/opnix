@@ -57,7 +57,9 @@ let
       umask u=r,g=,o=
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
       set -x
-      OP_SERVICE_ACCOUNT_TOKEN=$(cat ${cfg.serviceAccountTokenPath}) ${op} inject -o "$TMP_FILE" -i ${pkgs.writeText "blah" secretType.source} --config /root/.config/op
+      OP_SERVICE_ACCOUNT_TOKEN=$(cat ${cfg.serviceAccountTokenPath}) ${op} inject -o "$TMP_FILE" -i ${
+        pkgs.writeText secretType.name secretType.source
+      } --config /root/.config/op
     )
     chmod ${secretType.mode} "$TMP_FILE"
     mv -f "$TMP_FILE" "$_truePath"
@@ -80,17 +82,18 @@ let
     _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
     (( ++_opnix_generation ))
   '';
-  installSecrets = builtins.concatStringsSep "\n"
-    ([
-      "echo '[opnix] decrypting secrets...'"
-      "mkdir -p /root/.config/op"
-      "chmod 700 /root/.config/op"
-      testServiceAccountToken
-    ]
-    ++ (map installSecret (builtins.attrValues cfg.secrets))
+  createOpConfigDir = ''
+    mkdir -p /root/.config/op
+    chmod 600 /root/.config/op
+  '';
+  installSecrets = builtins.concatStringsSep "\n" ([
+    "echo '[opnix] decrypting secrets...'"
+    createOpConfigDir
+    testServiceAccountToken
+  ] ++ (map installSecret (builtins.attrValues cfg.secrets))
     ++ [ cleanupAndLink ]);
-in
-{
+in {
+  inherit createOpConfigDir;
   inherit newGeneration;
   inherit installSecrets;
   inherit chownSecrets;
