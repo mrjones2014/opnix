@@ -1,5 +1,6 @@
 { config, ... }: {
   opnix = {
+    systemdWantedBy = [ "homepage-dashboard" ];
     serviceAccountTokenPath = "/etc/op_service_account_token";
     secrets = {
       homepage-config.source = ''
@@ -16,9 +17,5 @@
         text = "{{HOMEPAGE_VAR_TEST_SECRET}}";
       };
     }];
-  };
-  systemd.services.homepage-dashboard = {
-    after = [ "opnix.service" ];
-    wants = [ "opnix.service" ];
   };
 }

@@ -30,11 +30,9 @@ in {
         type = types.oneOf [ types.str types.lines ];
         description =
           "The file text that will be encrypted; it can be a 1Password Secret Reference URI or some text that contains one or multiple Secret References URIs.";
-        example = literalExpression ''
-          \'\'
-            [SomeTomlHeader]
-            SomeValue = "{{ op://VaultName/ItemName/FieldName }}"
-          \'\'
+        example = ''
+          [SomeTomlHeader]
+          SomeValue = "{{ op://VaultName/ItemName/FieldName }}"
         '';
       };
       mode = mkOption {

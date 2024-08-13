@@ -43,20 +43,25 @@ in {
       type = types.attrsOf secretFileDeclaration;
       description = "The secrets you want to use in your NixOS deployment";
       default = { };
-      example = literalExpression ''
-        {
-          my-secret = {
-            source = "{{ op://VaultName/ItemName/FieldName }}";
-            user = config.services.some_service.user;
-            group = config.services.some_service.group;
-            mode = "0400";
-          };
-          another-secret.source = \'\'
-            [SomeTomlHeader]
-            SomeValue = "{{ op://AnotherVault/AnotherItem/AnotherField }}"
-          \'\';
-        }
-      '';
+      example = {
+        my-secret = {
+          source = "{{ op://VaultName/ItemName/FieldName }}";
+          mode = "0400";
+          inherit (config.services.some_service) user;
+          inherit (config.services.some_service) group;
+        };
+        another-secret.source = ''
+          [SomeTomlHeader]
+          SomeValue = "{{ op://AnotherVault/AnotherItem/AnotherField }}"
+        '';
+      };
+    };
+    systemdWantedBy = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      description = ''
+        A list of `systemd` service names that depend on secrets from `opnix`. This option will set `after = [ "opnix.service" ]` and `wants = [ "opnix.service" ]` for each specified `systemd` unit.'';
+      example = [ "homepage-dashboard" "wg-quick-vpn" ];
     };
   };
   config = mkIf (cfg.secrets != { }) (mkMerge [{
@@ -83,5 +88,10 @@ in {
         };
       };
     };
-  }]);
+  }] ++ (builtins.map (service: {
+    systemd.services.${service} = {
+      after = [ "opnix.service" ];
+      wants = [ "opnix.service" ];
+    };
+  }) cfg.systemdWantedBy));
 }
