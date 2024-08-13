@@ -1,32 +1,15 @@
 {
-  inputs = {
-    nixpkgs = { url = "github:nixos/nixpkgs/nixos-unstable"; };
-    flake-utils = { url = "github:numtide/flake-utils"; };
-  };
-  outputs = { nixpkgs, flake-utils, ... }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let pkgs = import nixpkgs { inherit system; };
-      in {
-        devShells.default = pkgs.mkShell {
-          name = "shell with nixos-shell CLI utility";
+  inputs = { nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable"; };
+  outputs = { nixpkgs, ... }:
+    let system = "x86_64-linux";
+    in {
+      nixosModules.default = import ./modules/op-secrets.nix;
 
-          packages = with pkgs; [ nixos-shell ];
-        };
-
-      }) // {
-        nixosModules.default = import ./modules/op-secrets.nix;
-
-        nixosConfigurations.vm = nixpkgs.lib.nixosSystem {
-            system = "x86_64-linux";
-            modules = [
-                # ./modules/op-secrets.nix
-                ./vms/vm.nix
-                # (
-                #     { ... }: {
-                #         nixpkgs.config.allowUnfree = true;
-                #     }
-                # )
-            ];
-        };
+      # test is a hostname for our machine
+      nixosConfigurations.test = nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules =
+          [ ./modules/op-secrets.nix ./test-nix-files/configuration.nix ];
       };
+    };
 }
