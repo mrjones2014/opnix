@@ -64,34 +64,40 @@ in {
       example = [ "homepage-dashboard" "wg-quick-vpn" ];
     };
   };
-  config = mkIf (cfg.secrets != { }) (mkMerge [{
-    systemd.services.opnix = {
-      wants = [ "network-online.target" ];
-      after = [ "network.target" "network-online.target" ];
+  config = mkIf (cfg.secrets != { }) (mkMerge [
+    {
+      systemd.services.opnix = {
+        wants = [ "network-online.target" ];
+        after = [ "network.target" "network-online.target" ];
 
-      serviceConfig = { Type = "oneshot"; };
+        serviceConfig = { Type = "oneshot"; };
 
-      script = ''
-        ${scripts.installSecrets}
-        ${scripts.chownSecrets}
-      '';
-    };
+        script = ''
+          ${scripts.installSecrets}
+          ${scripts.chownSecrets}
+        '';
+      };
 
-    system = {
-      activationScripts = {
-        # Create a new directory full of secrets for symlinking (this helps
-        # ensure removed secrets are actually removed, or at least become
-        # invalid symlinks).
-        opnixNewGeneration = {
-          text = scripts.newGeneration;
-          deps = [ "specialfs" ];
+      system = {
+        activationScripts = {
+          # Create a new directory full of secrets for symlinking (this helps
+          # ensure removed secrets are actually removed, or at least become
+          # invalid symlinks).
+          opnixNewGeneration = {
+            text = scripts.newGeneration;
+            deps = [ "specialfs" ];
+          };
         };
       };
-    };
-  }] ++ (builtins.map (service: {
-    systemd.services.${service} = {
-      after = [ "opnix.service" ];
-      wants = [ "opnix.service" ];
-    };
-  }) cfg.systemdWantedBy));
+    }
+    {
+      systemd.services = builtins.listToAttrs (builtins.map (systemdName: {
+        name = systemdName;
+        value = {
+          after = [ "opnix.service" ];
+          wants = [ "opnix.service" ];
+        };
+      }) cfg.systemdWantedBy);
+    }
+  ]);
 }
