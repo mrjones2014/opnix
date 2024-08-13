@@ -2,6 +2,20 @@
 let
   cfg = config.opnix;
   op = cfg.opBin;
+  op_tmp_dir = "/root/op_tmp";
+  op_cfg_dir = "/root/.config/op";
+  # fixes permissions issues with op session files
+  createTmpDirShim = ''
+    rm -rf ${op_tmp_dir}
+    mkdir -p ${op_tmp_dir}
+    chmod 600 ${op_tmp_dir}
+  '';
+  createOpConfigDir = ''
+    mkdir -p ${op_cfg_dir}
+    chmod 700 ${op_cfg_dir}
+    touch ${op_cfg_dir}/config
+    chmod 600 ${op_cfg_dir}/config
+  '';
   mountCommand = ''
     grep -q "${cfg.secretsMountPoint} ramfs" /proc/mounts ||
       mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
@@ -56,9 +70,9 @@ let
       umask u=r,g=,o=
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
       set -x
-      ${op} inject -o "$TMP_FILE" -i ${
+      TMPDIR="${op_tmp_dir}" ${op} inject -o "$TMP_FILE" -i ${
         pkgs.writeText secretType.name secretType.source
-      } --config /root/.config/op
+      } --config ${op_cfg_dir}
     )
     chmod ${secretType.mode} "$TMP_FILE"
     mv -f "$TMP_FILE" "$_truePath"
@@ -87,14 +101,10 @@ let
     _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
     (( ++_opnix_generation ))
   '';
-  createOpConfigDir = ''
-    mkdir -p /root/.config/op
-    chmod 700 /root/.config/op
-    ${pkgs.findutils}/bin/find /root/.config/op/ -type f -print0 | ${pkgs.findutils}/bin/xargs -0 chmod 600
-  '';
   installSecrets = builtins.concatStringsSep "\n" ([
-    "echo '[opnix] decrypting secrets...'"
+    "echo '[opnix] provisioning secrets...'"
     createOpConfigDir
+    createTmpDirShim
     testServiceAccountToken
   ] ++ (map installSecret (builtins.attrValues cfg.secrets))
     ++ [ cleanupAndLink ]);
