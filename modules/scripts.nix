@@ -84,7 +84,8 @@ let
   '';
   createOpConfigDir = ''
     mkdir -p /root/.config/op
-    chmod 600 /root/.config/op
+    chmod 700 /root/.config/op
+    ${pkgs.findutils}/bin/find /root/.config/op/ -type f -print0 | ${pkgs.findutils}/bin/xargs -0 chmod 600
   '';
   installSecrets = builtins.concatStringsSep "\n" ([
     "echo '[opnix] decrypting secrets...'"
