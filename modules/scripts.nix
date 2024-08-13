@@ -81,7 +81,7 @@ let
     SA_TOKEN_FILE_PERMS=$(stat -c %a '${cfg.environmentFile}')
     if [ "$SA_TOKEN_FILE_PERMS" -ne "400" ] && [ "$SA_TOKEN_FILE_PERMS" -ne "600" ]; then
       echo "[opnix] WARN: environment file '${cfg.environmentFile}' has incorrect permissions: $SA_TOKEN_FILE_PERMS"
-      echo "[opnix] WARN: environment file '${cfg.environmentFile}' should have permissions 0400 or 0600"
+      echo "[opnix] WARN: environment file '${cfg.environmentFile}' should have permissions 400 or 600"
     fi
 
     _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
