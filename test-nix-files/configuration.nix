@@ -7,6 +7,15 @@
 
   environment.systemPackages = with pkgs; [ docker ];
 
+  programs.neovim = {
+    enable = true;
+    vimAlias = true;
+    viAlias = true;
+  };
+  environment.variables.EDITOR = "nvim";
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   users.groups.admin = { };
   users.users = {
     admin = {
