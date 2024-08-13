@@ -3,7 +3,7 @@
     serviceAccountTokenPath = "/etc/op_service_account_token";
     secrets = {
       homepage-config.source = ''
-        HOMEPAGE_TEST_SECRET="{{ op://opnix testing/opnix test/password }}"
+        HOMEPAGE_VAR_TEST_SECRET="{{ op://opnix testing/opnix test/password }}"
       '';
     };
   };
@@ -13,7 +13,7 @@
     widgets = [{
       greeting = {
         text_size = "xl";
-        text = "{{HOMEPAGE_TEST_SECRET}}";
+        text = "{{HOMEPAGE_VAR_TEST_SECRET}}";
       };
     }];
   };
