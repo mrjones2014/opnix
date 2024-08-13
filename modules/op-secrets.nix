@@ -18,9 +18,10 @@ in {
       default = "${pkgs._1password}/bin/op";
       description = "The 1Password CLI `op` executable to use";
     };
-    serviceAccountTokenPath = mkOption {
+    environmentFile = mkOption {
       type = types.str;
-      description = "Path to a file which contains your service account token.";
+      description = ''
+        Path to a environment file which contains your service account token. Format should be `OP_SERVICE_ACCOUNT_TOKEN="{ your token here }"`. This is used to authorize the 1Password CLI in the systemd job.'';
     };
     secretsDir = mkOption {
       type = types.path;
@@ -70,7 +71,10 @@ in {
         wants = [ "network-online.target" ];
         after = [ "network.target" "network-online.target" ];
 
-        serviceConfig = { Type = "oneshot"; };
+        serviceConfig = {
+          Type = "oneshot";
+          EnvironmentFile = cfg.environmentFile;
+        };
 
         script = ''
           ${scripts.installSecrets}

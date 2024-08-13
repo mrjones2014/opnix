@@ -45,7 +45,6 @@ let
   chownSecrets = builtins.concatStringsSep "\n"
     ([ "echo '[opnix] chowning...'" ] ++ [ chownMountPoint ]
       ++ (map chownSecret (builtins.attrValues cfg.secrets)));
-  # TODO
   installSecret = secretType: ''
     ${setTruePath secretType}
     echo "expanding '${secretType.name}' to '$_truePath'..."
@@ -57,7 +56,7 @@ let
       umask u=r,g=,o=
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
       set -x
-      OP_SERVICE_ACCOUNT_TOKEN=$(cat ${cfg.serviceAccountTokenPath}) ${op} inject -o "$TMP_FILE" -i ${
+      ${op} inject -o "$TMP_FILE" -i ${
         pkgs.writeText secretType.name secretType.source
       } --config /root/.config/op
     )
@@ -69,14 +68,20 @@ let
     ''}
   '';
   testServiceAccountToken = ''
-    if [ ! -f "${cfg.serviceAccountTokenPath}" ]; then
-      echo "[opnix] ERROR: file '${cfg.serviceAccountTokenPath}' does not exist!"
+    if [ ! -f "${cfg.environmentFile}" ]; then
+      echo "[opnix] ERROR: environment file '${cfg.environmentFile}' does not exist!"
       exit 1
     fi
 
-    SA_TOKEN_FILE_PERMS=$(stat -c %a '${cfg.serviceAccountTokenPath}')
+    if [ ! -s "${cfg.environmentFile}" ]; then
+      echo "[opnix]: ERROR: environment file '${cfg.environmentFile}' is empty!"
+      exit 1
+    fi
+
+    SA_TOKEN_FILE_PERMS=$(stat -c %a '${cfg.environmentFile}')
     if [ "$SA_TOKEN_FILE_PERMS" -ne "400" ] && [ "$SA_TOKEN_FILE_PERMS" -ne "600" ]; then
-      echo "[opnix] WARN: file '${cfg.serviceAccountTokenPath}' has incorrect permissions: $SA_TOKEN_FILE_PERMS"
+      echo "[opnix] WARN: environment file '${cfg.environmentFile}' has incorrect permissions: $SA_TOKEN_FILE_PERMS"
+      echo "[opnix] WARN: environment file '${cfg.environmentFile}' should have permissions 0400 or 0600"
     fi
 
     _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"

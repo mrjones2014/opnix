@@ -1,7 +1,7 @@
 { config, ... }: {
   opnix = {
     systemdWantedBy = [ "homepage-dashboard" ];
-    serviceAccountTokenPath = "/etc/op_service_account_token";
+    environmentFile = "/etc/op_service_account_token.env";
     secrets = {
       homepage-config.source = ''
         HOMEPAGE_VAR_TEST_SECRET="{{ op://opnix testing/opnix test/password }}"
