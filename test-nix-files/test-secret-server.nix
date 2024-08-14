@@ -2,6 +2,7 @@
 let
   service_user = "test-secret-server-user";
   service_group = "test-secret-server-group";
+  port = 8080;
 in {
   users.users.${service_user} = {
     isSystemUser = true;
@@ -33,18 +34,27 @@ in {
     };
   };
 
-  # For demo purposes, just spin up a little web server that serves the secret files
+  # For demo purposes, just use netcat to serve the secret file when you ping it with an HTTP GET
   systemd.services.test-secret-server = {
     enable = true;
     # here, `opnix.secrets.test-secret.path` is the path to the generated file in the ramfs
-    # we'll just use `basename` to run `serve` on the directory it's in
+    # for demo purposes we'll just use netcat to serve the secret file over HTTP so we can fetch
+    # the secret via `curl`
     script = ''
-      echo "${config.opnix.secrets.test-secret.path}"
-      ${pkgs.nodePackages_latest.serve}/bin/serve $(basename ${config.opnix.secrets.test-secret.path})
+      while [[ 1 ]]
+      do
+        { echo -ne "HTTP/1.0 200 OK\r\nContent-Length: $(wc -c <${config.opnix.secrets.test-secret.path})\r\n\r\n"; cat ${config.opnix.secrets.test-secret.path}; } | ${pkgs.netcat}/bin/nc -l ${
+          builtins.toString port
+        }
+      done
     '';
+    serviceConfig = {
+      User = service_user;
+      Group = service_group;
+    };
     # auto start
     wantedBy = [ "multi-user.target" ];
   };
   # default port used by `serve` CLI
-  networking.firewall.allowedTCPPorts = [ 3000 ];
+  networking.firewall.allowedTCPPorts = [ port ];
 }
