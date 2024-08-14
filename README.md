@@ -34,7 +34,7 @@ Add the `opnix` module as a Flake input:
 }
 ```
 
-Then, in your configuration, for example, to run [homepage](https://github.com/gethomepage/homepage):
+Then, in your configuration:
 
 ```nix
 { config, ... }: {
@@ -45,30 +45,31 @@ Then, in your configuration, for example, to run [homepage](https://github.com/g
     environmentFile = "/run/opnix.env";
     # Set the systemd services that will use 1Password secrets; this makes them wait until
     # secrets are deployed before attempting to start the service.
-    systemdWantedBy = [ "homepage-dashboard" ];
+    systemdWantedBy = [ "my-systemd-service" ];
     # Specify the secrets you need
     secrets = {
       # The 1Password Secret Reference in here (the `op://` URI)
       # will get replaced with the actual secret at runtime
-      homepage-config.source = ''
-        HOMEPAGE_VAR_SOME_SECRET="{{ op://MyVault/MySecretItem/token }}"
+      some-secret.source = ''
+        # You can put arbitrary config markup in here, for example, TOML config
+        [ConfigRoot]
+        SomeSecretValue="{{ op://MyVault/MySecretItem/token }}"
       '';
       # you can also specify the UNIX file owner, group, mode,
-      homepage-config.user = "SomeServiceUser";
-      homepage-config.group = "SomeServiceGroup";
-      homepage-config.mode = "0600";
+      some-secret.user = "SomeServiceUser";
+      some-secret.group = "SomeServiceGroup";
+      some-secret.mode = "0600";
     };
   };
 
-  services.homepage-dashboard = {
+  systemd.services.my-systemd-service = {
     enable = true;
-    # this returns a generated path to the secret, stored temporarily in a
-    # [RamFS](https://www.kernel.org/doc/html/latest/filesystems/ramfs-rootfs-initramfs.html)
-    # The secrets are loaded by the 1Password CLI at boot, and are automatically deleted
-    # and reprovisioned on `nixos-rebuild` or system reboot
-    environmentFile = config.opnix.secrets.homepage-config.path;
-    # the rest of your homepage config goes here
-    # TODO show how to reference the secret
+    # here, `config.opnix.secrets.some-secret.path` is the ramfs path
+    # of the file with the actual secret injected
+    script = ''
+      some-script --env-file ${config.opnix.secrets.some-secret.path}
+    '';
+    wantedBy = [ "multi-user.target" ];
   };
 }
 ```
