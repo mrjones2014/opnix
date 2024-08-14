@@ -8,6 +8,19 @@ Manage secrets for NixOS with 1Password natively with a NixOS module.
 > This is _beta software._ There may be breaking changes in the future, and some things may not work.
 > Please try it out and report any issues that may come up!
 
+## Security
+
+With this setup, you should only need one unencrypted secret on your machine; your 1Password Service Account token.
+You should set your Service Account token to have the _absolute minimum required permissions._ Usually this means read-only
+access to only a single vault in which your server secrets are kept. You should set an expiration on the token and
+[rotate it regularly](https://developer.1password.com/docs/service-accounts/manage-service-accounts/#rotate-token).
+
+The Service Account token is provided to the `systemd` jobs via an `EnvironmentFile` so that the token will not appear in `systemd` logs.
+
+Your `source` text (e.g. `opnix.secrets.my-secret.source = "{{ op://SomeVault/SomeItem/token }}";`) _**does appear**_ in the Nix store, in plaintext.
+Your **actual secrets _do NOT_** appear in the Nix store at all; however they are mounted in plaintext to a temporary `ramfs` during runtime, with
+strict UNIX file permissions. These files go away when the machine is powered off, and are recreated during system activation.
+
 ## Usage
 
 Add the `opnix` module as a Flake input:
@@ -105,19 +118,6 @@ _a network connection is now required to provide secrets._
 
 For my use-case (just a simple home media server and WireGuard VPN server) this is a totally fine thing for me to accept,
 however you'll need to use your own judgement to decide if this project is a good fit for you.
-
-## Security
-
-With this setup, you should only need one unencrypted secret on your machine; your 1Password Service Account token.
-You should set your Service Account token to have the _absolute minimum required permissions._ Usually this is read-only
-access to only a single vault in which your server secrets are kept. You should set an expiration on the token and
-[rotate it regularly](https://developer.1password.com/docs/service-accounts/manage-service-accounts/#rotate-token).
-
-The Service Account token is provided to the `systemd` jobs via an `EnvironmentFile` so that the token will not appear in `systemd` logs.
-
-Your `source` text (e.g. `opnix.secrets.my-secret.source = "{{ op://SomeVault/SomeItem/token }}";`) _**does appear**_ in the Nix store, in plaintext.
-Your **actual secrets _do NOT_** appear in the Nix store at all; however they are mounted in plaintext to a temporary `ramfs` during runtime, with
-strict UNIX file permissions. These files go away when the machine is powered off, and are recreated during system activation.
 
 ## Acknowledgements/Prior Art
 
