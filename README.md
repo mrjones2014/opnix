@@ -3,7 +3,8 @@
 Manage secrets for NixOS with 1Password natively with a NixOS module.
 
 > [!NOTE]
-> This is _alpha software_ at this time. Expect breaking changes and possible instability.
+> This is _beta software._ There may be breaking changes in the future, and some things may not work.
+> Please try it out and report any issues that may come up!
 
 ## Usage
 
@@ -62,6 +63,7 @@ Then, in your configuration:
     };
   };
 
+  # run a systemd service
   systemd.services.my-systemd-service = {
     enable = true;
     # here, `config.opnix.secrets.some-secret.path` is the ramfs path
@@ -70,6 +72,14 @@ Then, in your configuration:
       some-script --env-file ${config.opnix.secrets.some-secret.path}
     '';
     wantedBy = [ "multi-user.target" ];
+  };
+
+  # or if there's a NixOS module and it has an `environmentFile` option,
+  # you can provide your secrets that way
+  services.homepage-dashboard = {
+    enable = true;
+    environmentFile = config.opnix.secrets.some-secret.path;
+    # ... the rest of your homepage config here
   };
 }
 ```
