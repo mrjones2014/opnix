@@ -1,11 +1,9 @@
 { pkgs, lib, ... }: {
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [ "1password-cli" ];
-  imports = [ ./homepage.nix ];
+  imports = [ ./test-secret-server.nix ];
   # customize kernel version
   boot.kernelPackages = pkgs.linuxPackages_5_15;
-
-  environment.systemPackages = with pkgs; [ docker ];
 
   programs.neovim = {
     enable = true;
@@ -13,6 +11,9 @@
     viAlias = true;
   };
   environment.variables.EDITOR = "nvim";
+
+  # enable DHCP networking to get a local IP address
+  networking.useDHCP = lib.mkDefault true;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 

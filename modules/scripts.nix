@@ -13,7 +13,9 @@ let
   createOpConfigDir = ''
     mkdir -p ${op_cfg_dir}
     chmod 700 ${op_cfg_dir}
-    touch ${op_cfg_dir}/config
+    if [ ! -f ${op_cfg_dir}/config ] || [ ! -s ${op_cfg_dir}/config ]; then
+      echo "{}" > ${op_cfg_dir}/config
+    fi
     chmod 600 ${op_cfg_dir}/config
   '';
   mountCommand = ''
