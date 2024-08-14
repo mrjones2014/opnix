@@ -20,10 +20,13 @@ let
   '';
   mountCommand = ''
     grep -q "${cfg.secretsMountPoint} ramfs" /proc/mounts ||
-      mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
+      /run/wrappers/bin/mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
+
+    grep -q "${cfg.secretsDir} ramfs" /proc/mounts ||
+      /run/wrappers/bin/mount -t ramfs none "${cfg.secretsDir}" -o nodev,nosuid,mode=0751
   '';
   newGeneration = ''
-    _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
+    _opnix_generation="$(basename "$(readlink ${cfg.secretsDir}/current)" || echo 0)"
     (( ++_opnix_generation ))
     echo "[opnix] creating new generation in ${cfg.secretsMountPoint}/$_opnix_generation"
     mkdir -p "${cfg.secretsMountPoint}"
@@ -39,8 +42,8 @@ let
     chown :${chownGroup} "${cfg.secretsMountPoint}" "${cfg.secretsMountPoint}/$_opnix_generation"
   '';
   cleanupAndLink = ''
-    echo "[opnix] symlinking new secrets to ${cfg.secretsDir} (generation $_opnix_generation)..."
-    ln -sfT "${cfg.secretsMountPoint}/$_opnix_generation" ${cfg.secretsDir}
+    echo "[opnix] symlinking new secrets to ${cfg.secretsDir}/current (generation $_opnix_generation)..."
+    ln -sfT "${cfg.secretsMountPoint}/$_opnix_generation" ${cfg.secretsDir}/current
 
     (( _opnix_generation > 1 )) && {
     echo "[opnix] removing old secrets (generation $(( _opnix_generation - 1 )))..."
@@ -68,7 +71,7 @@ let
 
     mkdir -p "$(dirname "$_truePath")"
     # shellcheck disable=SC2050
-    [ "${secretType.path}" != "${cfg.secretsDir}/${secretType.name}" ] && mkdir -p "$(dirname "${secretType.path}")"
+    [ "${secretType.path}" != "${cfg.secretsDir}/current/${secretType.name}" ] && mkdir -p "$(dirname "${secretType.path}")"
     (
       umask u=r,g=,o=
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
@@ -85,7 +88,7 @@ let
 
     ${lib.optionalString secretType.symlink ''
       # shellcheck disable=SC2050
-      [ "${secretType.path}" != "${cfg.secretsDir}/${secretType.name}" ] && ln -sfT "${cfg.secretsDir}/${secretType.name}" "${secretType.path}"
+      [ "${secretType.path}" != "${cfg.secretsDir}/current/${secretType.name}" ] && ln -sfT "${cfg.secretsDir}/current/${secretType.name}" "${secretType.path}"
     ''}
   '';
   testServiceAccountToken = ''
@@ -105,7 +108,7 @@ let
       echo "[opnix] WARN: environment file '${cfg.environmentFile}' should have permissions 400 or 600"
     fi
 
-    _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
+    _opnix_generation="$(basename "$(readlink ${cfg.secretsDir}/current)" || echo 0)"
     (( ++_opnix_generation ))
   '';
   installSecrets = builtins.concatStringsSep "\n" ([

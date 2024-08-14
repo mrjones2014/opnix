@@ -61,7 +61,7 @@ in {
       };
       path = mkOption {
         type = types.str;
-        default = "${cfg.secretsDir}/${config.name}";
+        default = "${cfg.secretsDir}/current/${config.name}";
         example = literalExpression ''
           "''${cfg.secretsDir}/''${config.name}"
         '';

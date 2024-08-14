@@ -14,6 +14,10 @@ let
 
   shellApp = pkgs.writeShellApplication {
     name = "mount.opnix";
+    runtimeInputs = [
+      pkgs.coreutils
+      pkgs.gnugrep
+    ];
     text = ''
       set -x
       ${scripts.newGeneration}
@@ -101,7 +105,7 @@ in {
         after = [ "network-online.target" ];
 
         unitConfig = {
-          ConditionPathExists = cfg.secretsDir;
+          #ConditionPathExists = cfg.secretsDir;
           ConditionCapability = "CAP_SYS_ADMIN";
         };
 
@@ -109,31 +113,37 @@ in {
         };
       }];
 
+      systemd.services."opnix-init" = {
+        script = ''
+          ${pkgs.coreutils}/bin/ls ${cfg.secretsDir}
+        '';
+        serviceConfig.Type = "oneshot";
+        wantedBy = [
+          #"basic.target"
+          # "sysinit.target"
+          "local-fs.target"
+        ];
+        wants = [ "${utils.escapeSystemdPath cfg.secretsDir}.automount" ];
+        after = [ "${utils.escapeSystemdPath cfg.secretsDir}.automount" ];
+      };
+
+      systemd.automounts = [{
+        where = cfg.secretsDir;
+
+        #wantedBy = [ "multi-user.target" ];
+        wantedBy = [
+          # "basic.target"
+          "sysinit.target"
+        ];
+
+        unitConfig = {
+          #ConditionPathExists = cfg.secretsDir;
+          ConditionCapability = "CAP_SYS_ADMIN";
+        };
+      }];
+
       environment.systemPackages = [ sbinApp ];
       system.fsPackages = [ sbinApp ];
-
-      system = {
-        activationScripts = {
-          # Create a new directory full of secrets for symlinking (this helps
-          # ensure removed secrets are actually removed, or at least become
-          # invalid symlinks).
-          opnixNewGeneration = {
-            text = ''
-              #mkdir -p ${cfg.secretsDir}
-            '';
-            deps = [ "specialfs" ];
-          };
-        };
-      };
     }
-    # {
-    #   systemd.services = builtins.listToAttrs (builtins.map (systemdName: {
-    #     name = systemdName;
-    #     value = {
-    #       after = [ "opnix.service" ];
-    #       wants = [ "opnix.service" ];
-    #     };
-    #   }) cfg.systemdWantedBy);
-    # }
   ]);
 }
