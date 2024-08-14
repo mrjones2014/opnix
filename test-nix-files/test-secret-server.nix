@@ -31,6 +31,11 @@ in {
         # You can specify the file mode (default 0400)
         mode = "0400";
       };
+      test-secret-2.source = ''
+        # You can put arbitrary configuration markup here, for example, TOML
+        [Config]
+        SecretValue = "{{ op://opnix testing/opnix test/password }}"
+      '';
     };
   };
 
