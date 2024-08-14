@@ -74,7 +74,7 @@ let
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
       # shellcheck disable=SC1091
       source "${cfg.environmentFile}"
-      export OP_SERVICE_ACCOUNT
+      export OP_SERVICE_ACCOUNT_TOKEN
       set -x
       TMPDIR="${op_tmp_dir}" ${op} inject -o "$TMP_FILE" -i ${
         pkgs.writeText secretType.name secretType.source
