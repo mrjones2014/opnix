@@ -14,10 +14,7 @@ let
 
   shellApp = pkgs.writeShellApplication {
     name = "mount.opnix";
-    runtimeInputs = [
-      pkgs.coreutils
-      pkgs.gnugrep
-    ];
+    runtimeInputs = [ pkgs.coreutils pkgs.gnugrep ];
     text = ''
       set -x
       ${scripts.newGeneration}
@@ -26,7 +23,7 @@ let
     '';
   };
 
-  sbinApp = pkgs.runCommand "mount.opnix" {} ''
+  sbinApp = pkgs.runCommand "mount.opnix" { } ''
     mkdir -p $out/sbin $out/bin
     (
       cd $out/sbin
@@ -91,9 +88,9 @@ in {
       example = [ "homepage-dashboard" "wg-quick-vpn" ];
     };
   };
-  config = mkIf (cfg.secrets != { }) (mkMerge [
-    {
-      systemd.mounts = [{
+  config = mkIf (cfg.secrets != { }) (mkMerge [{
+    systemd = {
+      mounts = [{
         #what = cfg.environmentFile;
         what = "opnix";
         where = cfg.secretsDir;
@@ -109,11 +106,10 @@ in {
           ConditionCapability = "CAP_SYS_ADMIN";
         };
 
-        mountConfig = {
-        };
+        mountConfig = { };
       }];
 
-      systemd.services."opnix-init" = {
+      services."opnix-init" = {
         script = ''
           ${pkgs.coreutils}/bin/ls ${cfg.secretsDir}
         '';
@@ -122,18 +118,23 @@ in {
           #"basic.target"
           # "sysinit.target"
           "local-fs.target"
+          "default.target"
         ];
         wants = [ "${utils.escapeSystemdPath cfg.secretsDir}.automount" ];
         after = [ "${utils.escapeSystemdPath cfg.secretsDir}.automount" ];
       };
 
-      systemd.automounts = [{
+      automounts = [{
         where = cfg.secretsDir;
+
+        before = [ "local-fs.target" ];
+        after = [ "local-fs-pre.target" ];
 
         #wantedBy = [ "multi-user.target" ];
         wantedBy = [
           # "basic.target"
           "sysinit.target"
+          # "default.target"
         ];
 
         unitConfig = {
@@ -141,9 +142,9 @@ in {
           ConditionCapability = "CAP_SYS_ADMIN";
         };
       }];
+    };
 
-      environment.systemPackages = [ sbinApp ];
-      system.fsPackages = [ sbinApp ];
-    }
-  ]);
+    environment.systemPackages = [ sbinApp ];
+    system.fsPackages = [ sbinApp ];
+  }]);
 }

@@ -54,6 +54,7 @@ in {
     script = ''
       set -euo pipefail
       echo the secret is $MY_SECRET
+      echo the path is ${config.opnix.secrets.test-env.path}
     '';
     wantedBy = [ "multi-user.target" ];
   };
