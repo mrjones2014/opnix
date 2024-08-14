@@ -10,6 +10,11 @@ let
     mkdir -p ${op_tmp_dir}
     chmod 600 ${op_tmp_dir}
   '';
+  chmodOpSessionFiles = ''
+    for i in $(${pkgs.findutils}/bin/find ${op_tmp_dir} -type f); do
+      chmod 600 "$i"
+    done
+  '';
   createOpConfigDir = ''
     mkdir -p ${op_cfg_dir}
     chmod 700 ${op_cfg_dir}
@@ -65,6 +70,7 @@ let
     ([ "echo '[opnix] chowning...'" ] ++ [ chownMountPoint ]
       ++ (map chownSecret (builtins.attrValues cfg.secrets)));
   installSecret = secretType: ''
+    ${chmodOpSessionFiles}
     ${setTruePath secretType}
     echo "expanding '${secretType.name}' to '$_truePath'..."
     TMP_FILE="$_truePath.tmp"

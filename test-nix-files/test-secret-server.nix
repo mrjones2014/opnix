@@ -37,6 +37,11 @@ in {
           MY_SECRET="{{ op://opnix testing/opnix test/password }}"
         '';
       };
+      test-secret-2.source = ''
+        # You can put arbitrary configuration markup here, for example, TOML
+        [Config]
+        SecretValue = "{{ op://opnix testing/opnix test/password }}"
+      '';
     };
   };
 
