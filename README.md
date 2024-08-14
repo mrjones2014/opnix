@@ -103,7 +103,7 @@ Then, in your configuration:
 using a [Service Account token](https://developer.1password.com/docs/service-accounts/). This does, however, come with the tradeoff that
 _a network connection is now required to provide secrets._
 
-For my use-case (just a simple home media server) this is a totally fine thing for me to accept,
+For my use-case (just a simple home media server and WireGuard VPN server) this is a totally fine thing for me to accept,
 however you'll need to use your own judgement to decide if this project is a good fit for you.
 
 ## Security
