@@ -10,7 +10,7 @@
         devShells.default = pkgs.mkShell {
           name = "shell with gnumake";
 
-          packages = with pkgs; [ gnumake ];
+          packages = with pkgs; [ just ];
         };
 
       }) // {
