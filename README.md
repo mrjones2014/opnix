@@ -58,10 +58,14 @@ Then, in your configuration:
         [ConfigRoot]
         SomeSecretValue="{{ op://MyVault/MySecretItem/token }}"
       '';
-      # you can also specify the UNIX file owner, group, mode,
+      # you can also specify the UNIX file owner, group, and mode
       some-secret.user = "SomeServiceUser";
       some-secret.group = "SomeServiceGroup";
       some-secret.mode = "0600";
+      # If you need to, you can even customize the path that the secret gets installed to
+      some-secret.path = "/some/other/path/some-secret";
+      # You can also disable symlinking the secret into the installation destination
+      some-secret.symlink = false;
     };
   };
 
