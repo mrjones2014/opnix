@@ -43,7 +43,7 @@ Then, in your configuration:
     # This is where you put your Service Account token in .env file format, e.g.
     # OP_SERVICE_ACCOUNT_TOKEN="{your token here}"
     # See: https://developer.1password.com/docs/service-accounts/use-with-1password-cli/#get-started
-    environmentFile = "/run/opnix.env";
+    environmentFile = "/etc/opnix.env";
     # Set the systemd services that will use 1Password secrets; this makes them wait until
     # secrets are deployed before attempting to start the service.
     systemdWantedBy = [ "my-systemd-service" ];
