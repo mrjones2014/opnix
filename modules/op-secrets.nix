@@ -38,7 +38,7 @@ in {
           description =
             "${types.str.description} (with check: non-empty without trailing slash)";
         };
-      default = "/run/op-nix.d";
+      default = "/run/opnix.d";
     };
     secrets = mkOption {
       type = types.attrsOf secretFileDeclaration;

@@ -1,6 +1,6 @@
-![check-flake workflow](https://github.com/mrjones2014/op-nix/actions/workflows/check-flake.yml/badge.svg) [![1Password CLI](https://img.shields.io/badge/1Password-CLI-blue?logo=1password&label=1Password)](https://developer.1password.com/docs/cli/) [![1Password Service Accounts](https://img.shields.io/badge/1Password-Service%20Accounts-blue?logo=1password&label=1Password)](https://developer.1password.com/docs/service-accounts)
+![check-flake workflow](https://github.com/mrjones2014/opnix/actions/workflows/check-flake.yml/badge.svg) [![1Password CLI](https://img.shields.io/badge/1Password-CLI-blue?logo=1password&label=1Password)](https://developer.1password.com/docs/cli/) [![1Password Service Accounts](https://img.shields.io/badge/1Password-Service%20Accounts-blue?logo=1password&label=1Password)](https://developer.1password.com/docs/service-accounts)
 
-# op-nix
+# opnix
 
 Manage secrets for NixOS with 1Password natively with a NixOS module.
 
@@ -30,7 +30,7 @@ Add the `opnix` module as a Flake input:
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     opnix = {
-      url = "/home/ivan/code/op-nix";
+      url = "github:mrjones2014/opnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
