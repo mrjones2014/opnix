@@ -8,7 +8,7 @@
       let pkgs = import nixpkgs { inherit system; };
       in {
         devShells.default = pkgs.mkShell {
-          name = "shell with gnumake";
+          name = "shell with justfile CLI";
 
           packages = with pkgs; [ just ];
         };

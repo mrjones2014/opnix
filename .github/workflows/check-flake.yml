@@ -17,5 +17,6 @@ jobs:
         with:
           fail-mode: true
           send-statistics: false
-      - name: Run nix flake check
-        run: nix flake check
+      - name: Check that test NixOS VM builds
+        uses: extractions/setup-just@v2
+        run: just build-vm
