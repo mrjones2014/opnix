@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, config, utils, ... }:
 with lib;
 let
   inherit (import ./types.nix {
@@ -11,6 +11,28 @@ let
     inherit lib;
     inherit config pkgs;
   };
+
+  shellApp = pkgs.writeShellApplication {
+    name = "mount.opnix";
+    text = ''
+      set -x
+      ${scripts.newGeneration}
+      ${scripts.installSecrets}
+      ${scripts.chownSecrets}
+    '';
+  };
+
+  sbinApp = pkgs.runCommand "mount.opnix" {} ''
+    mkdir -p $out/sbin $out/bin
+    (
+      cd $out/sbin
+      ln -s ${shellApp}/bin/mount.opnix
+    )
+    (
+      cd $out/bin
+      ln -s ${shellApp}/bin/mount.opnix
+    )
+  '';
 in {
   options.opnix = {
     opBin = mkOption {
@@ -67,20 +89,28 @@ in {
   };
   config = mkIf (cfg.secrets != { }) (mkMerge [
     {
-      systemd.services.opnix = {
-        wants = [ "network-online.target" ];
-        after = [ "network.target" "network-online.target" ];
+      systemd.mounts = [{
+        #what = cfg.environmentFile;
+        what = "opnix";
+        where = cfg.secretsDir;
+        type = "opnix";
+        options = "";
+        # options
 
-        serviceConfig = {
-          Type = "oneshot";
-          EnvironmentFile = cfg.environmentFile;
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+
+        unitConfig = {
+          ConditionPathExists = cfg.secretsDir;
+          ConditionCapability = "CAP_SYS_ADMIN";
         };
 
-        script = ''
-          ${scripts.installSecrets}
-          ${scripts.chownSecrets}
-        '';
-      };
+        mountConfig = {
+        };
+      }];
+
+      environment.systemPackages = [ sbinApp ];
+      system.fsPackages = [ sbinApp ];
 
       system = {
         activationScripts = {
@@ -88,20 +118,22 @@ in {
           # ensure removed secrets are actually removed, or at least become
           # invalid symlinks).
           opnixNewGeneration = {
-            text = scripts.newGeneration;
+            text = ''
+              #mkdir -p ${cfg.secretsDir}
+            '';
             deps = [ "specialfs" ];
           };
         };
       };
     }
-    {
-      systemd.services = builtins.listToAttrs (builtins.map (systemdName: {
-        name = systemdName;
-        value = {
-          after = [ "opnix.service" ];
-          wants = [ "opnix.service" ];
-        };
-      }) cfg.systemdWantedBy);
-    }
+    # {
+    #   systemd.services = builtins.listToAttrs (builtins.map (systemdName: {
+    #     name = systemdName;
+    #     value = {
+    #       after = [ "opnix.service" ];
+    #       wants = [ "opnix.service" ];
+    #     };
+    #   }) cfg.systemdWantedBy);
+    # }
   ]);
 }

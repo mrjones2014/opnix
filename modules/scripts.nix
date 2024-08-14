@@ -67,10 +67,14 @@ let
     TMP_FILE="$_truePath.tmp"
 
     mkdir -p "$(dirname "$_truePath")"
+    # shellcheck disable=SC2050
     [ "${secretType.path}" != "${cfg.secretsDir}/${secretType.name}" ] && mkdir -p "$(dirname "${secretType.path}")"
     (
       umask u=r,g=,o=
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
+      # shellcheck disable=SC1091
+      source "${cfg.environmentFile}"
+      export OP_SERVICE_ACCOUNT
       set -x
       TMPDIR="${op_tmp_dir}" ${op} inject -o "$TMP_FILE" -i ${
         pkgs.writeText secretType.name secretType.source
@@ -80,6 +84,7 @@ let
     mv -f "$TMP_FILE" "$_truePath"
 
     ${lib.optionalString secretType.symlink ''
+      # shellcheck disable=SC2050
       [ "${secretType.path}" != "${cfg.secretsDir}/${secretType.name}" ] && ln -sfT "${cfg.secretsDir}/${secretType.name}" "${secretType.path}"
     ''}
   '';
