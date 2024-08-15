@@ -71,6 +71,9 @@ in {
         wants = [ "network-online.target" ];
         after = [ "network.target" "network-online.target" ];
 
+        # re-run on nixos-rebuild
+        wantedBy = [ "sysinit-reactivation.target" ];
+
         serviceConfig = {
           Type = "oneshot";
           EnvironmentFile = cfg.environmentFile;
