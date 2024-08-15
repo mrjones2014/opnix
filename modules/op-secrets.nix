@@ -74,14 +74,13 @@ in {
         serviceConfig = {
           Type = "oneshot";
           EnvironmentFile = cfg.environmentFile;
+          Restart = "always";
         };
 
         script = ''
           ${scripts.installSecrets}
           ${scripts.chownSecrets}
         '';
-
-        restartTriggers = [ (builtins.toString cfg) ];
       };
     }
     {
