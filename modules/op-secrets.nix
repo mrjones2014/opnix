@@ -79,6 +79,8 @@ in {
         serviceConfig = {
           Type = "oneshot";
           EnvironmentFile = cfg.environmentFile;
+          RemainAfterExit = true;
+          ExecReload = opnixScript;
         };
 
         script = opnixScript;
