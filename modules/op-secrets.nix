@@ -81,7 +81,7 @@ in {
           ${scripts.chownSecrets}
         '';
 
-        restartTriggers = [ cfg ];
+        restartTriggers = [ builtins.toString cfg ];
       };
     }
     {
