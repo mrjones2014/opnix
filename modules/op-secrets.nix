@@ -65,7 +65,12 @@ in {
       example = [ "homepage-dashboard" "wg-quick-vpn" ];
     };
   };
-  config = mkIf (cfg.secrets != { }) (mkMerge [
+  config = let
+    opnixScript = ''
+      ${scripts.installSecrets}
+      ${scripts.chownSecrets}
+    '';
+  in mkIf (cfg.secrets != { }) (mkMerge [
     {
       systemd.services.opnix = {
         wants = [ "network-online.target" ];
@@ -74,13 +79,19 @@ in {
         serviceConfig = {
           Type = "oneshot";
           EnvironmentFile = cfg.environmentFile;
-          Restart = "always";
         };
 
-        script = ''
-          ${scripts.installSecrets}
-          ${scripts.chownSecrets}
-        '';
+        script = opnixScript;
+      };
+
+      systemd.services.opnix-restart = {
+        wants = [ "network-online.target" ];
+        after = [ "sysinit-reactivation.target" ];
+        serviceConfig = {
+          Type = "oneshot";
+          EnvironmentFile = cfg.environmentFile;
+        };
+        script = opnixScript;
       };
     }
     {
