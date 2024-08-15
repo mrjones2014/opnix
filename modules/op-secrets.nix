@@ -88,7 +88,7 @@ in {
       # secrets because we did a nixos-rebuild
       system.activationScripts.opnix-on-rebuild.text = ''
         ${scripts.setOpnixGeneration}
-        if (( _opnix_generation > 1 )) && {
+        (( _opnix_generation > 1 )) && {
         ${opnixScript}
         }
       '';
