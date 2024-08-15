@@ -81,7 +81,7 @@ in {
           ${scripts.chownSecrets}
         '';
 
-        restartTriggers = [ cfg.opnix ];
+        restartTriggers = [ cfg ];
       };
     }
     {
