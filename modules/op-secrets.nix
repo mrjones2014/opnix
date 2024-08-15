@@ -65,7 +65,12 @@ in {
       example = [ "homepage-dashboard" "wg-quick-vpn" ];
     };
   };
-  config = mkIf (cfg.secrets != { }) (mkMerge [
+  config = let
+    opnixScript = ''
+      ${scripts.installSecrets}
+      ${scripts.chownSecrets}
+    '';
+  in mkIf (cfg.secrets != { }) (mkMerge [
     {
       systemd.services.opnix = {
         wants = [ "network-online.target" ];
@@ -74,12 +79,10 @@ in {
         serviceConfig = {
           Type = "oneshot";
           EnvironmentFile = cfg.environmentFile;
+          ExecStart = opnixScript;
         };
 
-        script = ''
-          ${scripts.installSecrets}
-          ${scripts.chownSecrets}
-        '';
+        script = opnixScript;
       };
     }
     {
