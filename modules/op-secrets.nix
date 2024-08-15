@@ -79,7 +79,7 @@ in {
         serviceConfig = {
           Type = "oneshot";
           EnvironmentFile = cfg.environmentFile;
-          ExecStart = opnixScript;
+          ExecReload = opnixScript;
         };
 
         script = opnixScript;
