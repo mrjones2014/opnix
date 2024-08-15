@@ -83,17 +83,20 @@ in {
 
         script = opnixScript;
       };
-      # if no generation already exists, rely on the systemd startup job;
-      # otherwise, if there already is an existing generation, reprovision
-      # secrets because we did a nixos-rebuild
-      system.activationScripts.opnix-on-rebuild.text = ''
-        ${scripts.setOpnixGeneration}
-        (( _opnix_generation > 1 )) && {
-        source ${cfg.environmentFile}
-        export OP_SERVICE_ACCOUNT_TOKEN
-        ${opnixScript}
-        }
-      '';
+      system.activationScripts.opnix-on-rebuild = {
+        # if no generation already exists, rely on the systemd startup job;
+        # otherwise, if there already is an existing generation, reprovision
+        # secrets because we did a nixos-rebuild
+        text = ''
+          ${scripts.setOpnixGeneration}
+          (( _opnix_generation > 1 )) && {
+          source ${cfg.environmentFile}
+          export OP_SERVICE_ACCOUNT_TOKEN
+          ${opnixScript}
+          }
+        '';
+        deps = [ "userbinenv" ];
+      };
     }
     {
       systemd.services = builtins.listToAttrs (builtins.map (systemdName: {
