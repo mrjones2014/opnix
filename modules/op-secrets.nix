@@ -95,7 +95,7 @@ in {
           ${opnixScript}
           }
         '';
-        deps = [ "userbinenv" ];
+        deps = [ "usrbinenv" ];
       };
     }
     {
