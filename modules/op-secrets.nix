@@ -80,11 +80,9 @@ in {
           ${scripts.installSecrets}
           ${scripts.chownSecrets}
         '';
-      };
 
-      system.activationScripts.restartOpNix.text = ''
-        systemctl restart opnix.service
-      '';
+        restartTriggers = [ cfg.opnix ];
+      };
     }
     {
       systemd.services = builtins.listToAttrs (builtins.map (systemdName: {
