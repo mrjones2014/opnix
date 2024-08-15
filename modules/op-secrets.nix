@@ -81,6 +81,10 @@ in {
           ${scripts.chownSecrets}
         '';
       };
+
+      system.activationScripts.restartOpNix.text = ''
+        systemctl restart opnix.service
+      '';
     }
     {
       systemd.services = builtins.listToAttrs (builtins.map (systemdName: {
