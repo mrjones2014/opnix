@@ -105,20 +105,17 @@ let
       echo "[opnix] WARN: environment file '${cfg.environmentFile}' has incorrect permissions: $SA_TOKEN_FILE_PERMS"
       echo "[opnix] WARN: environment file '${cfg.environmentFile}' should have permissions 400 or 600"
     fi
-
-    _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
-    (( ++_opnix_generation ))
   '';
   installSecrets = builtins.concatStringsSep "\n" ([
     "echo '[opnix] provisioning secrets...'"
     createOpConfigDir
     createTmpDirShim
     testServiceAccountToken
+    newGeneration
   ] ++ (map installSecret (builtins.attrValues cfg.secrets))
     ++ [ cleanupAndLink ]);
 in {
   inherit createOpConfigDir;
-  inherit newGeneration;
   inherit installSecrets;
   inherit chownSecrets;
 }

@@ -81,18 +81,6 @@ in {
           ${scripts.chownSecrets}
         '';
       };
-
-      system = {
-        activationScripts = {
-          # Create a new directory full of secrets for symlinking (this helps
-          # ensure removed secrets are actually removed, or at least become
-          # invalid symlinks).
-          opnixNewGeneration = {
-            text = scripts.newGeneration;
-            deps = [ "specialfs" ];
-          };
-        };
-      };
     }
     {
       systemd.services = builtins.listToAttrs (builtins.map (systemdName: {
