@@ -25,7 +25,7 @@ let
   '';
   mountCommand = ''
     grep -q "${cfg.secretsMountPoint} ramfs" /proc/mounts ||
-      mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
+      ${pkgs.util-linux}/bin/mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
   '';
   setOpnixGeneration = ''
     _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
