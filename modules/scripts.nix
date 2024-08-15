@@ -29,10 +29,10 @@ let
   '';
   setOpnixGeneration = ''
     _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
-    (( ++_opnix_generation ))
   '';
   newGeneration = ''
     ${setOpnixGeneration}
+    (( ++_opnix_generation ))
     echo "[opnix] creating new generation in ${cfg.secretsMountPoint}/$_opnix_generation"
     mkdir -p "${cfg.secretsMountPoint}"
     chmod 0751 "${cfg.secretsMountPoint}"
