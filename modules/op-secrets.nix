@@ -89,6 +89,8 @@ in {
       system.activationScripts.opnix-on-rebuild.text = ''
         ${scripts.setOpnixGeneration}
         (( _opnix_generation > 1 )) && {
+        source ${cfg.environmentFile}
+        export OP_SERVICE_ACCOUNT_TOKEN
         ${opnixScript}
         }
       '';
