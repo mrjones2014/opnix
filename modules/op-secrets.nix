@@ -79,12 +79,19 @@ in {
         serviceConfig = {
           Type = "oneshot";
           EnvironmentFile = cfg.environmentFile;
-          RemainAfterExit = true;
-          ExecReload = opnixScript;
         };
 
         script = opnixScript;
       };
+      # if no generation already exists, rely on the systemd startup job;
+      # otherwise, if there already is an existing generation, reprovision
+      # secrets because we did a nixos-rebuild
+      system.activationScripts.opnix-on-rebuild.text = ''
+        ${scripts.setOpnixGeneration}
+        if (( _opnix_generation > 1 )) && {
+        ${opnixScript}
+        }
+      '';
     }
     {
       systemd.services = builtins.listToAttrs (builtins.map (systemdName: {

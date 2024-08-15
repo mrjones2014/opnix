@@ -27,9 +27,12 @@ let
     grep -q "${cfg.secretsMountPoint} ramfs" /proc/mounts ||
       mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
   '';
-  newGeneration = ''
+  setOpnixGeneration = ''
     _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
     (( ++_opnix_generation ))
+  '';
+  newGeneration = ''
+    ${setOpnixGeneration}
     echo "[opnix] creating new generation in ${cfg.secretsMountPoint}/$_opnix_generation"
     mkdir -p "${cfg.secretsMountPoint}"
     chmod 0751 "${cfg.secretsMountPoint}"
@@ -115,6 +118,7 @@ let
   ] ++ (map installSecret (builtins.attrValues cfg.secrets))
     ++ [ cleanupAndLink ]);
 in {
+  inherit setOpnixGeneration;
   inherit createOpConfigDir;
   inherit installSecrets;
   inherit chownSecrets;
