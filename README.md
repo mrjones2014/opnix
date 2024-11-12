@@ -10,7 +10,7 @@ Manage secrets for NixOS with 1Password natively with a NixOS module.
 
 ## Security
 
-With this setup, you should only need one unencrypted secret on your machine; your 1Password Service Account token.
+With this setup, you should only need one unencrypted secret on your machine; your [1Password Service Account](https://developer.1password.com/docs/service-accounts/) token.
 You should set your Service Account token to have the _absolute minimum required permissions._ Usually this means read-only
 access to only a single vault in which your server secrets are kept. You should set an expiration on the token and
 [rotate it regularly](https://developer.1password.com/docs/service-accounts/manage-service-accounts/#rotate-token).
