@@ -15,7 +15,7 @@ in {
   options.opnix = {
     opBin = mkOption {
       type = types.str;
-      default = "${pkgs._1password}/bin/op";
+      default = "${pkgs._1password-cli}/bin/op";
       description = "The 1Password CLI `op` executable to use";
     };
     environmentFile = mkOption {
