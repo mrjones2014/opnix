@@ -14,7 +14,8 @@
         };
 
       }) // {
-        nixosModules.default = import ./modules/op-secrets.nix;
+        darwinModules.default = import ./modules/darwin.nix;
+        nixosModules.default = import ./modules/nixos.nix;
 
         # test is a hostname for our machine
         nixosConfigurations.test = nixpkgs.lib.nixosSystem {

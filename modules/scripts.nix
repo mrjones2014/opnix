@@ -1,9 +1,11 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, options, pkgs, ... }:
 let
+  isDarwin = lib.attrsets.hasAttrByPath ["environment" "darwinConfig"] options;
+
   cfg = config.opnix;
   op = cfg.opBin;
-  op_tmp_dir = "/root/op_tmp";
-  op_cfg_dir = "/root/.config/op";
+  op_tmp_dir = "${lib.optionalString isDarwin "/var"}/root/op_tmp";
+  op_cfg_dir = "${lib.optionalString isDarwin "/var"}/root/.config/op";
   # fixes permissions issues with op session files
   createTmpDirShim = ''
     rm -rf ${op_tmp_dir}
@@ -23,10 +25,20 @@ let
     fi
     chmod 600 ${op_cfg_dir}/config
   '';
-  mountCommand = ''
-    grep -q "${cfg.secretsMountPoint} ramfs" /proc/mounts ||
-      ${pkgs.util-linux}/bin/mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
-  '';
+  mountCommand =
+    if isDarwin
+    then ''
+      if ! diskutil info "${cfg.secretsMountPoint}" &> /dev/null; then
+          num_sectors=1048576
+          dev=$(hdiutil attach -nomount ram://"$num_sectors" | sed 's/[[:space:]]*$//')
+          newfs_hfs -v agenix "$dev"
+          mount -t hfs -o nobrowse,nodev,nosuid,-m=0751 "$dev" "${cfg.secretsMountPoint}"
+      fi
+    ''
+    else ''
+      grep -q "${cfg.secretsMountPoint} ramfs" /proc/mounts ||
+        ${pkgs.util-linux}/bin/mount -t ramfs none "${cfg.secretsMountPoint}" -o nodev,nosuid,mode=0751
+    '';
   setOpnixGeneration = ''
     _opnix_generation="$(basename "$(readlink ${cfg.secretsDir})" || echo 0)"
   '';
@@ -40,7 +52,10 @@ let
     mkdir -p "${cfg.secretsMountPoint}/$_opnix_generation"
     chmod 0751 "${cfg.secretsMountPoint}/$_opnix_generation"
   '';
-  chownGroup = "keys";
+  chownGroup =
+    if isDarwin
+    then "admin"
+    else "keys";
   # chown the secrets mountpoint and the current generation to the keys group
   # instead of leaving it root:root.
   chownMountPoint = ''
@@ -76,6 +91,7 @@ let
     TMP_FILE="$_truePath.tmp"
 
     mkdir -p "$(dirname "$_truePath")"
+    # shellcheck disable=SC2050
     [ "${secretType.path}" != "${cfg.secretsDir}/${secretType.name}" ] && mkdir -p "$(dirname "${secretType.path}")"
     (
       umask u=r,g=,o=
@@ -89,6 +105,7 @@ let
     mv -f "$TMP_FILE" "$_truePath"
 
     ${lib.optionalString secretType.symlink ''
+      # shellcheck disable=SC2050
       [ "${secretType.path}" != "${cfg.secretsDir}/${secretType.name}" ] && ln -sfT "${cfg.secretsDir}/${secretType.name}" "${secretType.path}"
     ''}
   '';
