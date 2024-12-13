@@ -96,10 +96,14 @@ let
     (
       umask u=r,g=,o=
       test -d "$(dirname "$TMP_FILE")" || echo "[opnix] WARNING: $(dirname "$TMP_FILE") does not exist!"
-      set -x
-      TMPDIR="${op_tmp_dir}" ${op} inject -o "$TMP_FILE" -i ${
-        pkgs.writeText secretType.name secretType.source
-      } --config ${op_cfg_dir}
+      # shellcheck disable=SC2034
+      out=$(
+        ${lib.optionalString cfg.debug "set -x"}
+        TMPDIR="${op_tmp_dir}" ${op} inject -o "$TMP_FILE" -i ${
+          pkgs.writeText secretType.name secretType.source
+        } --config ${op_cfg_dir}
+      )
+      ${lib.optionalString cfg.debug ''echo "$out"''}
     )
     chmod ${secretType.mode} "$TMP_FILE"
     mv -f "$TMP_FILE" "$_truePath"

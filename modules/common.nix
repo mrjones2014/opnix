@@ -52,5 +52,10 @@ in {
         '';
       };
     };
+    debug = mkOption {
+      type = types.bool;
+      description = "Whether to enable debug logs";
+      default = false;
+    };
   };
 }
