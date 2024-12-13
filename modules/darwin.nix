@@ -4,7 +4,12 @@ toplevel @ {
   pkgs,
   ...
 }: let
-  inherit (lib) mkIf mkMerge;
+  inherit
+    (lib)
+    mkAfter
+    mkIf
+    mkMerge
+    ;
 
   cfg = config.opnix;
   scripts = import ./scripts.nix toplevel;
@@ -38,13 +43,20 @@ in {
           # if no generation already exists, rely on the launchd startup job;
           # otherwise, if there already is an existing generation, reprovision
           # secrets because we did a darwin-rebuild
-          postActivation.text = lib.mkAfter ''
+          preActivation.text = ''
             ${scripts.setOpnixGeneration}
             (( _opnix_generation > 1 )) && {
             # shellcheck disable=SC1091
             source ${cfg.environmentFile}
             export OP_SERVICE_ACCOUNT_TOKEN
-            ${opnixScript}
+            ${scripts.installSecrets}
+            }
+          '';
+
+          users.text = mkAfter ''
+            ${scripts.setOpnixGeneration}
+            (( _opnix_generation > 1 )) && {
+            ${scripts.chownSecrets}
             }
           '';
         };
