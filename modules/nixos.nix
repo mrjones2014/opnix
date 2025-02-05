@@ -1,6 +1,7 @@
 toplevel @ {
   config,
   lib,
+  pkgs,
   ...
 }: let
   inherit

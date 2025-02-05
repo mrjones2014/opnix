@@ -21,7 +21,7 @@
         nixosConfigurations.test = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules =
-            [ ./modules/op-secrets.nix ./test-nix-files/configuration.nix ];
+            [ ./modules/nixos.nix ./test-nix-files/configuration.nix ];
         };
       };
 }
