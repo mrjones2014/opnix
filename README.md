@@ -2,6 +2,9 @@
 
 # opnix
 
+> [!IMPORTANT]
+> This project was built for a hackathon. [brizzbuzz/opnix](https://github.com/brizzbuzz/opnix) is probably a better solution for most users.
+
 Manage secrets for NixOS with 1Password natively with a NixOS module.
 
 > [!NOTE]
