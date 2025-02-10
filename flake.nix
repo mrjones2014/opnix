@@ -14,13 +14,14 @@
         };
 
       }) // {
-        nixosModules.default = import ./modules/op-secrets.nix;
+        darwinModules.default = import ./modules/darwin.nix;
+        nixosModules.default = import ./modules/nixos.nix;
 
         # test is a hostname for our machine
         nixosConfigurations.test = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules =
-            [ ./modules/op-secrets.nix ./test-nix-files/configuration.nix ];
+            [ ./modules/nixos.nix ./test-nix-files/configuration.nix ];
         };
       };
 }
